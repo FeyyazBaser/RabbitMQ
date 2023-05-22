@@ -14,9 +14,15 @@ var channel = connection.CreateModel();
 channel.QueueDeclare("hello-queue", true, false, false); //durable=>rabbitmq refresh olunca kuyruk kalbolmasın memoryde tutmaya yarar
                                                          //exclusive=>true olursa sadece burdaki kanaldan erişebliriz,autodelete=>son subscriber düşerse kuyruk otomatik silinir
 
-string message = "Welcome to RabbitMQ";
-var messageBody = Encoding.UTF8.GetBytes(message); // RabbitMQ ya mesajlar byte[] olarak gönderilir
+Enumerable.Range(1, 50).ToList().ForEach(x =>
+{
+    string message = $"Message {x}";
+    var messageBody = Encoding.UTF8.GetBytes(message); // RabbitMQ ya mesajlar byte[] olarak gönderilir
 
-channel.BasicPublish(string.Empty,"hello-queue",null,messageBody);
-Console.WriteLine("Mesaj RabbitMQye gönderildi");
+    channel.BasicPublish(string.Empty, "hello-queue", null, messageBody);
+    Console.WriteLine($"Mesaj RabbitMQye gönderildi:{message}");
+});
+
+
+
 Console.ReadLine();
