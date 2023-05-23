@@ -28,9 +28,10 @@ namespace RabbitMQ
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
             {
                 var message = Encoding.UTF8.GetString(e.Body.ToArray());
+                Thread.Sleep(1500);
                 Console.WriteLine("Mesajınız: " + message);
                 channel.BasicAck(e.DeliveryTag, false);
-                Thread.Sleep(1500);
+               
             };
 
 
@@ -65,9 +66,43 @@ namespace RabbitMQ
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
             {
                 var message = Encoding.UTF8.GetString(e.Body.ToArray());
+                Thread.Sleep(1500);
                 Console.WriteLine("Mesajınız: " + message);
                 channel.BasicAck(e.DeliveryTag, false);
+              
+            };
+
+
+            Console.ReadLine();
+        }
+
+        public static void GetMessageWithDirectExchangeFromQueue()
+        {
+
+            var factory = new ConnectionFactory();
+            factory.Uri = new Uri("amqps://lhzvwhvx:6hVBInuK-klWodBsrXQLqyDhIC-tmNuV@rat.rmq2.cloudamqp.com/lhzvwhvx");
+
+            using var connection = factory.CreateConnection();
+
+            var channel = connection.CreateModel();
+
+            channel.BasicQos(0, 1, false); //global=>true olursa prefetchCount sayısı subscriberlara paylaştırır false olursa her birine prefetchCount kadar mesaj gönderir
+
+            var consumer = new EventingBasicConsumer(channel);
+            var queueName = "direct-queue-Warning";
+            channel.BasicConsume(queueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
+
+            Console.WriteLine("Loglar dinleniyor...");
+            consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
+            {
+                var message = Encoding.UTF8.GetString(e.Body.ToArray());
                 Thread.Sleep(1500);
+                Console.WriteLine("Mesajınız: " + message);
+                //File.AppendAllText("log-critical.txt", message + "\n");
+
+                channel.BasicAck(e.DeliveryTag, false);
+           
+
             };
 
 

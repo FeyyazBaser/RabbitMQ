@@ -2,5 +2,6 @@
 using RabbitMQ;
 
 //Consumer.GetDirectlyMessageFromQueue();
-Consumer.GetMessageWithFanoutExchangeFromQueue();
+//Consumer.GetMessageWithFanoutExchangeFromQueue();
+Consumer.GetMessageWithDirectExchangeFromQueue();
 
