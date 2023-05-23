@@ -23,7 +23,7 @@ namespace RabbitMQ
 
             var consumer = new EventingBasicConsumer(channel);
 
-            channel.BasicConsume("hello-queue", false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
+         
 
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
             {
@@ -34,7 +34,7 @@ namespace RabbitMQ
                
             };
 
-
+            channel.BasicConsume("hello-queue", false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
             Console.ReadLine();
         }
 
@@ -60,7 +60,7 @@ namespace RabbitMQ
 
             var consumer = new EventingBasicConsumer(channel);
 
-            channel.BasicConsume(randomQueueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
+          
 
             Console.WriteLine("Loglar dinleniyor...");
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
@@ -72,7 +72,7 @@ namespace RabbitMQ
               
             };
 
-
+            channel.BasicConsume(randomQueueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
             Console.ReadLine();
         }
 
@@ -89,8 +89,8 @@ namespace RabbitMQ
             channel.BasicQos(0, 1, false); //global=>true olursa prefetchCount sayısı subscriberlara paylaştırır false olursa her birine prefetchCount kadar mesaj gönderir
 
             var consumer = new EventingBasicConsumer(channel);
-            var queueName = "direct-queue-Warning";
-            channel.BasicConsume(queueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
+            var queueName = "direct-queue-Info";
+            
 
             Console.WriteLine("Loglar dinleniyor...");
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
@@ -104,6 +104,7 @@ namespace RabbitMQ
            
 
             };
+            channel.BasicConsume(queueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
 
 
             Console.ReadLine();
