@@ -4,4 +4,5 @@ using RabbitMQ;
 //Producer.SendMessageDirectlyQueue();
 //Producer.SendMessageWithFanoutExchange();
 //Producer.SendMessageWithDirectExchange();
-Producer.SendMessageWithTopicExchange(); 
+//Producer.SendMessageWithTopicExchange(); 
+Producer.SendMessageWithHeaderExchange();

@@ -145,5 +145,45 @@ namespace RabbitMQ
             Console.ReadLine();
         }
 
+        public static void GetMessageWithHeaderExchangeFromQueue()
+        {
+
+            var factory = new ConnectionFactory();
+            factory.Uri = new Uri("amqps://lhzvwhvx:6hVBInuK-klWodBsrXQLqyDhIC-tmNuV@rat.rmq2.cloudamqp.com/lhzvwhvx");
+
+            using var connection = factory.CreateConnection();
+
+            var channel = connection.CreateModel();
+
+            channel.BasicQos(0, 1, false); //global=>true olursa prefetchCount sayısı subscriberlara paylaştırır false olursa her birine prefetchCount kadar mesaj gönderir
+
+            var consumer = new EventingBasicConsumer(channel);
+            var randomQueueName = channel.QueueDeclare().QueueName;
+
+            Dictionary<string, object> headers = new Dictionary<string, object>();
+            headers.Add("fromat", "pdf");
+            headers.Add("shape", "a4");
+            headers.Add("x-match", "all");
+
+            channel.QueueBind(randomQueueName, "header-exchange", "",headers);
+
+
+            Console.WriteLine("Loglar dinleniyor...");
+            consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
+            {
+                var message = Encoding.UTF8.GetString(e.Body.ToArray());
+                Thread.Sleep(1500);
+                Console.WriteLine("Mesajınız: " + message);
+               
+
+                channel.BasicAck(e.DeliveryTag, false);
+
+
+            };
+            channel.BasicConsume(randomQueueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
+
+            Console.ReadLine();
+        }
+
     }
 }

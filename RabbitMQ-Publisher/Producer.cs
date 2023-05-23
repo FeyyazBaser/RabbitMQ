@@ -131,5 +131,30 @@ namespace RabbitMQ
 
             Console.ReadLine();
         }
+
+        public static void SendMessageWithHeaderExchange()
+        {
+            var factory = new ConnectionFactory();
+            factory.Uri = new Uri("amqps://lhzvwhvx:6hVBInuK-klWodBsrXQLqyDhIC-tmNuV@rat.rmq2.cloudamqp.com/lhzvwhvx");
+
+            using var connection = factory.CreateConnection();
+
+            var channel = connection.CreateModel();
+
+            channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
+
+            Dictionary<string,object> headers = new Dictionary<string, object>();
+            headers.Add("fromat", "pdf");
+            headers.Add("shape", "a4");
+
+            var properties =channel.CreateBasicProperties();
+            properties.Headers = headers;
+            var message = "Header mesajı";
+            var messageBody= Encoding.UTF8.GetBytes(message);
+            channel.BasicPublish("header-exchange", "", properties, messageBody);
+
+            Console.WriteLine("Mesaj gönderilmiştir");
+            Console.ReadLine();
+        }
     }
 }
