@@ -23,7 +23,7 @@ namespace RabbitMQ
 
             var consumer = new EventingBasicConsumer(channel);
 
-         
+
 
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
             {
@@ -31,7 +31,7 @@ namespace RabbitMQ
                 Thread.Sleep(1500);
                 Console.WriteLine("Mesajınız: " + message);
                 channel.BasicAck(e.DeliveryTag, false);
-               
+
             };
 
             channel.BasicConsume("hello-queue", false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
@@ -60,7 +60,7 @@ namespace RabbitMQ
 
             var consumer = new EventingBasicConsumer(channel);
 
-          
+
 
             Console.WriteLine("Loglar dinleniyor...");
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
@@ -69,7 +69,7 @@ namespace RabbitMQ
                 Thread.Sleep(1500);
                 Console.WriteLine("Mesajınız: " + message);
                 channel.BasicAck(e.DeliveryTag, false);
-              
+
             };
 
             channel.BasicConsume(randomQueueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
@@ -90,7 +90,7 @@ namespace RabbitMQ
 
             var consumer = new EventingBasicConsumer(channel);
             var queueName = "direct-queue-Info";
-            
+
 
             Console.WriteLine("Loglar dinleniyor...");
             consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
@@ -101,11 +101,46 @@ namespace RabbitMQ
                 //File.AppendAllText("log-critical.txt", message + "\n");
 
                 channel.BasicAck(e.DeliveryTag, false);
-           
+
 
             };
             channel.BasicConsume(queueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
 
+
+            Console.ReadLine();
+        }
+        public static void GetMessageWithTopicExchangeFromQueue()
+        {
+
+            var factory = new ConnectionFactory();
+            factory.Uri = new Uri("amqps://lhzvwhvx:6hVBInuK-klWodBsrXQLqyDhIC-tmNuV@rat.rmq2.cloudamqp.com/lhzvwhvx");
+
+            using var connection = factory.CreateConnection();
+
+            var channel = connection.CreateModel();
+
+            channel.BasicQos(0, 1, false); //global=>true olursa prefetchCount sayısı subscriberlara paylaştırır false olursa her birine prefetchCount kadar mesaj gönderir
+
+            var consumer = new EventingBasicConsumer(channel);
+            var randomQueueName = channel.QueueDeclare().QueueName;
+
+            var routeKey = "#.Info";
+            channel.QueueBind(randomQueueName, "logs-topic", routeKey);
+
+
+            Console.WriteLine("Loglar dinleniyor...");
+            consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
+            {
+                var message = Encoding.UTF8.GetString(e.Body.ToArray());
+                Thread.Sleep(1500);
+                Console.WriteLine("Mesajınız: " + message);
+                //File.AppendAllText("log-critical.txt", message + "\n");
+
+                channel.BasicAck(e.DeliveryTag, false);
+
+
+            };
+            channel.BasicConsume(randomQueueName, false, consumer);  // autoack=>true olursa kuyruktan siler false yaparsak doğru okunduktan sonra silmesini biz söyleriz
 
             Console.ReadLine();
         }
