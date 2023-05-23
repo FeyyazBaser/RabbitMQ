@@ -1,7 +1,7 @@
 ﻿using RabbitMQ.Client;
+using RabbitMQ_Common;
 using System.Text;
-
-
+using System.Text.Json;
 
 namespace RabbitMQ
 {
@@ -114,7 +114,7 @@ namespace RabbitMQ
 
             Enumerable.Range(1, 50).ToList().ForEach(x =>
             {
-                
+
                 LogNames log1 = (LogNames)random.Next(1, 5);
                 LogNames log2 = (LogNames)random.Next(1, 5);
                 LogNames log3 = (LogNames)random.Next(1, 5);
@@ -123,7 +123,7 @@ namespace RabbitMQ
 
                 string message = $"log-type: {log1}-{log2}-{log3}";
                 var messageBody = Encoding.UTF8.GetBytes(message); // RabbitMQ ya mesajlar byte[] olarak gönderilir
-               
+
 
                 channel.BasicPublish("logs-topic", routeKey, null, messageBody);
                 Console.WriteLine($"Log RabbitMQye gönderildi:{message}");
@@ -143,16 +143,51 @@ namespace RabbitMQ
 
             channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
 
-            Dictionary<string,object> headers = new Dictionary<string, object>();
+            Dictionary<string, object> headers = new Dictionary<string, object>();
             headers.Add("fromat", "pdf");
             headers.Add("shape", "a4");
 
-            var properties =channel.CreateBasicProperties();
+            var properties = channel.CreateBasicProperties();
             properties.Headers = headers;
             properties.Persistent = true; // mesajlar kalıcı olur 
             var message = "Header mesajı";
-            var messageBody= Encoding.UTF8.GetBytes(message);
+            var messageBody = Encoding.UTF8.GetBytes(message);
             channel.BasicPublish("header-exchange", "", properties, messageBody);
+
+            Console.WriteLine("Mesaj gönderilmiştir");
+            Console.ReadLine();
+        }
+
+        public static void SendComplexTypeWithHeaderExchange()
+        {
+            var factory = new ConnectionFactory();
+            factory.Uri = new Uri("amqps://lhzvwhvx:6hVBInuK-klWodBsrXQLqyDhIC-tmNuV@rat.rmq2.cloudamqp.com/lhzvwhvx");
+
+            using var connection = factory.CreateConnection();
+
+            var channel = connection.CreateModel();
+
+            channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
+
+            Dictionary<string, object> headers = new Dictionary<string, object>();
+            headers.Add("fromat", "pdf");
+            headers.Add("shape", "a4");
+
+            var properties = channel.CreateBasicProperties();
+            properties.Headers = headers;
+            properties.Persistent = true; // mesajlar kalıcı olur 
+
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Printer",
+                Price = 450,
+                Stock = 10
+            };
+
+            var serializedProduct = JsonSerializer.Serialize(product);
+
+            channel.BasicPublish("header-exchange", "", properties, Encoding.UTF8.GetBytes(serializedProduct));
 
             Console.WriteLine("Mesaj gönderilmiştir");
             Console.ReadLine();

@@ -5,4 +5,5 @@ using RabbitMQ;
 //Producer.SendMessageWithFanoutExchange();
 //Producer.SendMessageWithDirectExchange();
 //Producer.SendMessageWithTopicExchange(); 
-Producer.SendMessageWithHeaderExchange();
+//Producer.SendMessageWithHeaderExchange();
+Producer.SendComplexTypeWithHeaderExchange();
