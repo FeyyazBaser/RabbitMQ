@@ -11,7 +11,7 @@ namespace RabbitMQ.Web.Excel.Models
         }
 
 
-        public DbSet<UserFile> userFiles { get; set; }
+        public DbSet<UserFile> UserFiles { get; set; }
     }
 
 

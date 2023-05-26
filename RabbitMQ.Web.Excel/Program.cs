@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQ.Client;
 using RabbitMQ.Web.Excel.Models;
+using RabbitMQ.Web.Excel.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +16,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
 }).AddEntityFrameworkStores<AppDbContext>();
-
+builder.Services.AddSingleton(sp => new ConnectionFactory() { Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQUri")), DispatchConsumersAsync = true });
+builder.Services.AddSingleton<RabbitMQProducer>();
+builder.Services.AddSingleton<RabbitMQClientService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,9 +33,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
