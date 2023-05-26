@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ_Common;
 using System.Data;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Product = FileCreateWorkerService.Models.Product;
@@ -32,7 +33,9 @@ namespace FileCreateWorkerService
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var consumer = new AsyncEventingBasicConsumer(_channel);
+            _channel.BasicConsume(RabbitMQClientService.queueName, false, consumer);
             consumer.Received += Consumer_Received;
+           
             return Task.CompletedTask;
         }
 
@@ -41,28 +44,38 @@ namespace FileCreateWorkerService
             await Task.Delay(5000);
             var createExcelMessage = JsonSerializer.Deserialize<CreateExcelMessage>(Encoding.UTF8.GetString(@event.Body.ToArray()));
 
-            using var ms=new MemoryStream();
+            using var ms = new MemoryStream();
             var wb = new XLWorkbook();
             var ds = new DataSet();
             ds.Tables.Add(GetTable("products"));
-            
+
             wb.Worksheets.Add(ds);
             wb.SaveAs(ms);
 
             MultipartFormDataContent multipartFormDataContent = new();
             multipartFormDataContent.Add(new ByteArrayContent(ms.ToArray()), "file", Guid.NewGuid().ToString() + ".xlsx");
 
-            var baseUrl = "https://localhost:44329/api/files";
-            using(var httpClient = new HttpClient())
+            var baseUrl = "https://localhost:7180/api/files";
+            using (var httpClient = new HttpClient())
             {
-                var response= await httpClient.PostAsync($"{baseUrl}?fileId={createExcelMessage.FileId}", multipartFormDataContent);
-                if(response.IsSuccessStatusCode)
+
+                try
                 {
-                    _logger.LogInformation($"File (Id:{createExcelMessage.FileId}) was created by successful");
-                    _channel.BasicAck(@event.DeliveryTag, false);
+                    var response = await httpClient.PostAsync($"{baseUrl}?fileId={createExcelMessage.FileId}", multipartFormDataContent);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        _logger.LogInformation($"File (Id:{createExcelMessage.FileId}) was created by successful");
+                        _channel.BasicAck(@event.DeliveryTag, false);
+                    }
                 }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                
             }
-           
+
         }
 
         private DataTable GetTable(string tableName)
