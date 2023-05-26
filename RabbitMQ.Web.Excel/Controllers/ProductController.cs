@@ -14,7 +14,7 @@ namespace RabbitMQ.Web.Excel.Controllers
         private UserManager<IdentityUser> _userManager;
         private readonly AppDbContext _context;
         private readonly RabbitMQProducer _rabbitMQProducer;
-        public ProductController(UserManager<IdentityUser> userManager, AppDbContext context,RabbitMQProducer rabbitMQProducer)
+        public ProductController(UserManager<IdentityUser> userManager, AppDbContext context, RabbitMQProducer rabbitMQProducer)
         {
             _userManager = userManager;
             _context = context;
@@ -42,7 +42,6 @@ namespace RabbitMQ.Web.Excel.Controllers
 
             _rabbitMQProducer.Publish(new CreateExcelMessage
             {
-                UserId = user.Id,
                 FileId = userFile.Id
             });
             TempData["StartCreatingExcel"] = true;
