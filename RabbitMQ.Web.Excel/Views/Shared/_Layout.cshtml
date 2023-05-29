@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RabbitMQ.Web.Excel.styles.css" asp-append-version="true" />
+
 </head>
 <body>
     <header>
@@ -59,6 +60,44 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"
+            integrity="sha512-k8WL9L2jG8KyG3pCJA4mHMdg2YSoWrdB5QNqLIhROv69udwp87WvbqzbsiAL65wy7T9jHU7rAoePr1ToPBc0Lw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            var connection = new signalR.HubConnectionBuilder().withUrl("/MyHub").build();
+
+            start();
+            function start() {
+                connection.start().then().catch((err) => {
+
+                    console.log(err);
+                    setTimeout(() => start(), 2000);
+                })
+            }
+
+            connection.on("CompletedFile", () => {
+
+                console.log("Excel oluşturuldu");
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Excel oluşturuldu',
+                    showConfirmButton: true,
+                    confirmButtonText: "Dosyalarım"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location = "/product/files";
+                    }
+                })
+
+            });
+        })
+
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
